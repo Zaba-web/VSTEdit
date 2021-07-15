@@ -23,9 +23,11 @@ export default {
 </script>
 
 <style lang="sass">
+body
+	background: #1E252E
 .demo-container
-	width: 700px
-	height: 500px
+	width: 900px
+	height: 600px
 	margin: 0 auto
-	margin-top: 150px
+	margin-top: 100px
 </style>
