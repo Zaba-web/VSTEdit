@@ -3,19 +3,38 @@
         <div class="toolbar">
             <div class="toolbar-inner-cotnainer">
                 <tool-group v-for="(group, key) in tools" :group-name="group.name" :key="key">
-                    <tool :theme="theme" v-for="(tool, index) in group.tools" :name="tool.name" :index="index" :group-index="key" :title="tool.title" :key="index" @toolUsed="applyToolFunctionality">
+                    <tool 
+                        :theme="theme" 
+                        v-for="(tool, index) in group.tools" 
+                        :name="tool.name" :index="index" 
+                        :group-index="key" 
+                        :title="tool.title" 
+                        :key="index" 
+                        @toolUsed="applyToolFunctionality"
+                    >
                         {{tool.displayContent}}
                     </tool>
                 </tool-group>
             </div>
         </div>
-        <div class="content __VSTEditor_content" contenteditable="true" @click="getTargetElement" @blur="saveContent" ref="editorContentDOMElement" @keydown="handlePressedKey" >
+        <div 
+            class="content __VSTEditor_content" 
+            contenteditable="true" 
+            @click="getTargetElement" 
+            @blur="saveContent" 
+            ref="editorContentDOMElement" 
+            @keydown="handlePressedKey" 
+        >
             <slot></slot>
         </div>
         <div class="additional-contianer">
             <input type="hidden" v-model="editorCodeContent">
         </div>
-        <image-setting :is-visible='settingWindowsVisibility.imageSettings' :image="targetElement" @settingsWindowsClosed="closeSettingWindow('imageSettings')"></image-setting>
+        <image-setting 
+            :is-visible='settingWindowsVisibility.imageSettings' 
+            :image="targetElement" 
+            @settingsWindowsClosed="closeSettingWindow('imageSettings')"
+        />
     </div>
 </template>
 
@@ -55,8 +74,12 @@ export default {
         let editorSettings = inject('customSettings') != undefined ? inject('customSettings').editorSettings : undefined
 
         const settingWindowsVisibility = ref({
-            imageSettings: true
+            imageSettings: false
         })
+
+        const specialTagTriggers = {
+            "IMG": () => settingWindowsVisibility.value.imageSettings = true
+        }
 
         onMounted(()=>{
             targetElement.value = editorContentDOMElement.value
@@ -66,7 +89,10 @@ export default {
         // detect last element was clicked
         function getTargetElement(event) {
             targetElement.value = event.target
-            if(targetElement.value.tagName == "IMG") settingWindowsVisibility.value.imageSettings = true
+            
+            // if there is some special action for selected element
+            if(specialTagTriggers[targetElement.value.tagName]) 
+                specialTagTriggers[targetElement.value.tagName]()
         }
 
         // apply tool
