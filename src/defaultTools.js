@@ -95,7 +95,7 @@ export default [
         ]
     },
     {
-        name: 'Images',
+        name: 'Image',
         tools: [
             {
                 name: 'insert_name', 
@@ -148,6 +148,35 @@ export default [
                     })
                     
                     input.click() // open file dialog
+                }
+            },
+        ]
+    },
+    {
+        name: 'Alignment',
+        tools: [
+            {
+                name: 'align_left', 
+                title: "Align left", 
+                displayContent: "<", 
+                action(editorState) { 
+                    editorState.targetElement.style.textAlign = "left"
+                }
+            },
+            {
+                name: 'align_center', 
+                title: "Align center", 
+                displayContent: "|", 
+                action(editorState) { 
+                    editorState.targetElement.style.textAlign = "center"
+                }
+            },            
+            {
+                name: 'align_right', 
+                title: "Align right", 
+                displayContent: ">", 
+                action(editorState) { 
+                    editorState.targetElement.style.textAlign = "right"
                 }
             },
         ]
