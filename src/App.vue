@@ -1,6 +1,8 @@
 <template>
 	<div class="demo-container">
-		<editor></editor>
+		<editor>
+			<h1>Test</h1>
+		</editor>
 	</div>
 </template>
 
@@ -9,6 +11,11 @@ import VSTEdit from "@/components/VSTEdit.vue"
 
 export default {
 	name: 'App',
+	provide: {
+		customSettings: {
+			editorSettings: {imageLoadHandler: 'http://127.0.0.1:8000/api/upload-image'}
+		}
+	},
 	components: {
 		'editor': VSTEdit
 	}
