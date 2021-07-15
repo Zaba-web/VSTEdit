@@ -133,8 +133,9 @@ export default [
                         request.open('POST', editorState.config.imageLoadHandler)
 
                         request.onload = () => {
+                            // request failed
                             if(request.status != 200) { 
-                                alert("Error: image was not uploaded") 
+                                alert(`Error: image could not be uploaded. Status code: ${request.status}`) 
                                 return ;
                             }
                             
