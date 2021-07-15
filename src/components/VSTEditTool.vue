@@ -38,7 +38,7 @@ export default {
 
 <style lang="sass" scoped>
 .tool-container
-    height: 30px
+    height: 23px
     min-width: 30px
     transition: .4s
     display: inline-block
