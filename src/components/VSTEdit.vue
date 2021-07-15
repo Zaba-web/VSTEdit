@@ -1,5 +1,5 @@
 <template>
-    <div class="main-editor-container" :class="[theme, `border-${borderShape}`]">
+    <div class="__VSTEditor_main_container" :class="theme">
         <div class="toolbar">
             <div class="toolbar-inner-cotnainer">
                 <tool-group v-for="(group, key) in tools" :group-name="group.name" :key="key">
@@ -9,12 +9,13 @@
                 </tool-group>
             </div>
         </div>
-        <div class="content __VSTEditor_content" contenteditable="true" @click="getTargetElement" @blur="saveContent" ref="editorContentDOMElement" @keydown="handlePressedKey">
+        <div class="content __VSTEditor_content" contenteditable="true" @click="getTargetElement" @blur="saveContent" ref="editorContentDOMElement" @keydown="handlePressedKey" >
             <slot></slot>
         </div>
         <div class="additional-contianer">
             <input type="hidden" v-model="editorCodeContent">
         </div>
+        <image-setting :is-visible='settingWindowsVisibility.imageSettings' :image="targetElement" @settingsWindowsClosed="closeSettingWindow('imageSettings')"></image-setting>
     </div>
 </template>
 
@@ -23,6 +24,7 @@ import {onMounted, ref, inject} from 'vue'
 
 import VSTEditTool from '@/components/VSTEditTool.vue'
 import VSTEditToolsGroup from '@/components/VSTEditToolsGroup.vue'
+import VSTEditImageSettings from '@/components/VSTEditImageSettings.vue'
 
 import defaultTools from '@/defaultTools'
 
@@ -30,48 +32,47 @@ export default {
 
     components:{
         'tool': VSTEditTool,
-        'tool-group': VSTEditToolsGroup
+        'tool-group': VSTEditToolsGroup,
+        'image-setting': VSTEditImageSettings
     },
 
     props: {
         theme: {
             type: String,
             default: 'dark-theme'
-        },
-        borderShape: {
-            type: String,
-            default: 'rounded'
         }
     },
 
     setup(props, context) {
         console.warn(props, context)
 
-        let editorSettings
-
-        if(inject('customSettings'))
-            editorSettings = inject('customSettings').editorSettings
-
         let editorCodeContent = ref("")
-        let targetElement = null
+        let targetElement = ref(null)
 
         const editorContentDOMElement = ref(null) // references to contenteditable div
         const tools = [...defaultTools]
 
+        let editorSettings = inject('customSettings') != undefined ? inject('customSettings').editorSettings : undefined
+
+        const settingWindowsVisibility = ref({
+            imageSettings: true
+        })
+
         onMounted(()=>{
-            targetElement = editorContentDOMElement.value
+            targetElement.value = editorContentDOMElement.value
             saveContent()
         })
 
         // detect last element was clicked
-        function getTargetElement(event){
-            targetElement = event.target
+        function getTargetElement(event) {
+            targetElement.value = event.target
+            if(targetElement.value.tagName == "IMG") settingWindowsVisibility.value.imageSettings = true
         }
 
         // apply tool
         function applyToolFunctionality(data) {
             tools[data.groupIndex].tools[data.index].action({
-                targetElement: targetElement,
+                targetElement: targetElement.value,
                 config: editorSettings
             }, appendItem, wrapSelectedText)
         }
@@ -118,6 +119,7 @@ export default {
 
         }
 
+        // save content of editor to reactive variable which is connected with hidden input
         function saveContent() {
             // Replace < and > chars in inputed text
             editorContentDOMElement.value.innerText.replaceAll('<', '&lt;')
@@ -128,40 +130,53 @@ export default {
         }
 
         function handlePressedKey(e) {
-            if(e.keyCode == 13)
-                document.execCommand('formatBlock', false, 'p')
+            if(e.keyCode == 13) { 
+                document.execCommand('defaultParagraphSeparator', false, 'p')
+            }
+        }
+
+        function closeSettingWindow(key){
+            settingWindowsVisibility.value[key] = false
         }
 
         return {
             getTargetElement: getTargetElement,
+            targetElement: targetElement,
             applyToolFunctionality: applyToolFunctionality,
             saveContent: saveContent,
             handlePressedKey: handlePressedKey,
+            closeSettingWindow: closeSettingWindow,
+
             tools: tools,
             editorContentDOMElement: editorContentDOMElement,
-            editorCodeContent: editorCodeContent
+            editorCodeContent: editorCodeContent,
+            settingWindowsVisibility: settingWindowsVisibility
         }
 
     },
 }
 </script>
 
-<style lang="sass" scoped>
-.main-editor-container
+<style lang="sass">
+.__VSTEditor_main_container
     width: 100%
     height: 100%
     display: flex
     flex-direction: column
+    position: relative
     
     & .toolbar, & .content
         width: 100%
         box-sizing: border-box
         padding: 10px  
+        border-radius: 6px
 
     & .content
+        width: 100%
         height: 100%
         margin-top: 10px
-        overflow: auto
+        overflow-y: auto
+        outline: none
 
     & .toolbar-inner-cotnainer
         margin-top: 10px
@@ -176,11 +191,43 @@ export default {
         & .toolbar, & .content
             background: #1A2029
             color: #fff
-            border: 1px solid black
+            border: 1px solid #1F252E
             box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-    &.border-rounded
-        & .toolbar, & .content
-            border-radius: 6px
-.additional-contianer
-    display: none
+            
+    & .additional-contianer
+        display: none
+
+.__VSTEditor_input
+    margin-top: 6px
+    outline: none
+.__VSTEditor_button
+    padding: 8px
+
+.dark-theme
+    & .__VSTEditor_input
+        background: none
+        border: 0
+        border-bottom: 1px solid #fff
+        color: #fff
+        box-sizing: border-box
+        padding: 2px
+    & .__VSTEditor_button
+        background: #242931
+        transition: .4s
+        border: 0
+        outline: none
+        color: #fff
+        cursor: pointer
+        border: 1px solid #30363E
+        border-radius: 6px
+        &:last-of-type
+            margin-left: 10px
+        &:hover
+            background: #9F193A
+
+.vste-fade-enter-from, .vste-fade-leave-to
+  opacity: 0
+.vste-fade-enter-active, .vste-fade-leave-active
+  transition: opacity .3s ease-in
+        
 </style>
