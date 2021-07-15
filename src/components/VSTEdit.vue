@@ -9,13 +9,17 @@
                 </tool-group>
             </div>
         </div>
-        <div class="content __VSTEditor_content" contenteditable="true" @click="getTargetElement" @blur="saveContent" ref="editorContentDOMElement" @keydown="handlePressedKey"></div>
-        <input type="hidden" v-model="editorCodeContent">
+        <div class="content __VSTEditor_content" contenteditable="true" @click="getTargetElement" @blur="saveContent" ref="editorContentDOMElement" @keydown="handlePressedKey">
+            <slot></slot>
+        </div>
+        <div class="additional-contianer">
+            <input type="hidden" v-model="editorCodeContent">
+        </div>
     </div>
 </template>
 
 <script>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, inject} from 'vue'
 
 import VSTEditTool from '@/components/VSTEditTool.vue'
 import VSTEditToolsGroup from '@/components/VSTEditToolsGroup.vue'
@@ -43,6 +47,11 @@ export default {
     setup(props, context) {
         console.warn(props, context)
 
+        let editorSettings
+
+        if(inject('customSettings'))
+            editorSettings = inject('customSettings').editorSettings
+
         let editorCodeContent = ref("")
         let targetElement = null
 
@@ -51,6 +60,7 @@ export default {
 
         onMounted(()=>{
             targetElement = editorContentDOMElement.value
+            saveContent()
         })
 
         // detect last element was clicked
@@ -60,7 +70,10 @@ export default {
 
         // apply tool
         function applyToolFunctionality(data) {
-            tools[data.groupIndex].tools[data.index].action(targetElement, appendItem, wrapSelectedText)
+            tools[data.groupIndex].tools[data.index].action({
+                targetElement: targetElement,
+                config: editorSettings
+            }, appendItem, wrapSelectedText)
         }
 
         // insert element at the end of the selected element
@@ -168,5 +181,6 @@ export default {
     &.border-rounded
         & .toolbar, & .content
             border-radius: 6px
-
+.additional-contianer
+    display: none
 </style>
