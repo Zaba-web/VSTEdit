@@ -25,7 +25,10 @@ export default {
 <style lang="sass" scoped>
 .tools-container
     display: flex
-    flex-wrap: warp
+    flex-wrap: wrap
     gap: 10px
-    padding-top: 10px
+    padding: 10px 25px 0 0
+    height: 100%
+span
+    font-size: 12px
 </style>
