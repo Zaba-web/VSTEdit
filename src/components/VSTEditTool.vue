@@ -1,8 +1,8 @@
 <template>
     <div class="tool-container" :class="theme" @click="useTool" :title="title">
         <div class="tool-inner-wrapper">
-            <div>
-                <slot></slot>
+            <div v-html="content">
+                
             </div>
         </div>
     </div>
@@ -15,7 +15,8 @@ export default {
         index: Number,
         groupIndex: Number,
         name: String,
-        title: String
+        title: String,
+        content: String
     },
 
     setup(props, context) {
@@ -53,6 +54,7 @@ export default {
         display: flex
         justify-content: center
         align-items: center
+        padding-top: 1px
 
     &.dark-theme
         background: #242931

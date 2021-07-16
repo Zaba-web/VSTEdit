@@ -16,8 +16,8 @@
                         :title="tool.title" 
                         :key="index" 
                         @toolUsed="applyToolFunctionality"
+                        :content="tool.displayContent"
                     >
-                        {{tool.displayContent}}
                     </tool>
                 </tool-group>
             </div>
@@ -310,7 +310,7 @@ export default {
     cursor: pointer
 
 .VSTEdit__icon
-    width: 16px
+    height: 14px
 
 .dark-theme
     & .__VSTEditor_input
