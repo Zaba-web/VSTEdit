@@ -43,4 +43,10 @@ export default {
         color: #fff
         border: 1px solid #1F252E
         box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px
+
+    &.light-theme
+        background: #F5F5F5
+        color: #181E27
+        border: 1px solid #c2c2c2
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px
 </style>
