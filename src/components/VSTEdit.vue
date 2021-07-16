@@ -1,8 +1,13 @@
 <template>
-    <div class="__VSTEditor_main_container" :class="theme">
+    <div class="__VSTEditor_main_container" :class="theme" ref="rootEditorElement">
         <div class="toolbar">
             <div class="toolbar-inner-cotnainer">
-                <tool-group v-for="(group, key) in tools" :group-name="group.name" :key="key">
+                <tool-group v-for="(group, key) in tools"
+                            :group-name="group.name" 
+                            :key="key"
+                            :displayGroupName="displayGroupName"
+                            :theme="theme"
+                            >
                     <tool 
                         :theme="theme" 
                         v-for="(tool, index) in group.tools" 
@@ -20,20 +25,28 @@
         <div 
             class="content __VSTEditor_content" 
             contenteditable="true" 
-            @click="getTargetElement" 
+            @click="getTargetElement"
             @blur="saveContent" 
             ref="editorContentDOMElement" 
             @keydown="handlePressedKey" 
         >
             <slot></slot>
         </div>
-        <div class="additional-contianer">
-            <input type="hidden" v-model="editorCodeContent">
+        <div class="VSTEdit_additional-contianer">
+            <input type="hidden" v-model="editorCodeContent" :name="inputName">
         </div>
+        <settings-trigger v-if="showSettingsTrigger" @click="openSettingsWindow"></settings-trigger>
         <image-setting 
             :is-visible='settingWindowsVisibility.imageSettings' 
             :image="targetElement" 
+            :theme="theme"
             @settingsWindowsClosed="closeSettingWindow('imageSettings')"
+        />
+        <link-setting 
+            :is-visible='settingWindowsVisibility.linkSettings' 
+            :link="targetElement" 
+            :theme="theme"
+            @settingsWindowsClosed="closeSettingWindow('linkSettings')"
         />
     </div>
 </template>
@@ -44,6 +57,8 @@ import {onMounted, ref, inject} from 'vue'
 import VSTEditTool from '@/components/VSTEditTool.vue'
 import VSTEditToolsGroup from '@/components/VSTEditToolsGroup.vue'
 import VSTEditImageSettings from '@/components/VSTEditImageSettings.vue'
+import VSTEditSettingsTrigger from '@/components/VSTEditSettingsTrigger.vue'
+import VSTEditLinkSettings from '@/components/VSTEditLinkSettings.vue'
 
 import defaultTools from '@/defaultTools'
 
@@ -52,33 +67,55 @@ export default {
     components:{
         'tool': VSTEditTool,
         'tool-group': VSTEditToolsGroup,
-        'image-setting': VSTEditImageSettings
+        'settings-trigger': VSTEditSettingsTrigger,
+        'image-setting': VSTEditImageSettings,
+        'link-setting': VSTEditLinkSettings,
     },
 
     props: {
         theme: {
             type: String,
             default: 'dark-theme'
+        },
+        inputName: {
+            type: String,
+            default: 'VSTEditor_input'
+        },
+        displayGroupName: {
+            type: Boolean,
+            default: true
         }
     },
 
     setup(props, context) {
-        console.warn(props, context)
+
+        let areCustomSettingsSet = inject('customSettings') != undefined
+        let editorSettings, userTools
+    
+        if(areCustomSettingsSet) {
+            editorSettings = inject('customSettings').editorSettings
+            userTools = inject('customSettings').tools != undefined ? inject('customSettings').tools : []
+        }
 
         let editorCodeContent = ref("")
         let targetElement = ref(null)
+        let rootEditorElement = ref(null)
 
         const editorContentDOMElement = ref(null) // references to contenteditable div
-        const tools = [...defaultTools]
+        const tools = [...defaultTools, ...userTools]
 
-        let editorSettings = inject('customSettings') != undefined ? inject('customSettings').editorSettings : undefined
-
+        // visibility of different settings windows
         const settingWindowsVisibility = ref({
-            imageSettings: false
+            imageSettings: false,
+            linkSettings: false
         })
 
+        // this variable describes visibility of the button that allows to open the settings window
+        const showSettingsTrigger = ref(false) 
+
         const specialTagTriggers = {
-            "IMG": () => settingWindowsVisibility.value.imageSettings = true
+            "IMG": () => settingWindowsVisibility.value.imageSettings = true,
+            "A": () => settingWindowsVisibility.value.linkSettings = true
         }
 
         onMounted(()=>{
@@ -89,23 +126,33 @@ export default {
         // detect last element was clicked
         function getTargetElement(event) {
             targetElement.value = event.target
-            
-            // if there is some special action for selected element
+
+            // if selected element support additional settings
+            showSettingsTrigger.value = specialTagTriggers[targetElement.value.tagName] ? true : false
+        }
+
+        function openSettingsWindow() {
             if(specialTagTriggers[targetElement.value.tagName]) 
                 specialTagTriggers[targetElement.value.tagName]()
         }
 
         // apply tool
         function applyToolFunctionality(data) {
+            context.emit('toolUsed', data)
+
             tools[data.groupIndex].tools[data.index].action({
                 targetElement: targetElement.value,
-                config: editorSettings
+                config: editorSettings,
+                rootEditorElement: rootEditorElement.value
             }, appendItem, wrapSelectedText)
         }
 
         // insert element at the end of the selected element
         function appendItem(target, codeToAppend) {
-            target.insertAdjacentHTML('beforeend', codeToAppend)
+            if(target.classList.contains('__VSTEditor_content'))
+                target.insertAdjacentHTML('beforeend', codeToAppend)
+            else
+                target.insertAdjacentHTML('afterend', codeToAppend)
         }
 
         // wrapping selected text into custom html node
@@ -131,6 +178,8 @@ export default {
             selection = selection.getRangeAt(0) // convert selection in range object
 
             const selectedText = selection.extractContents() // create DocumentFragment from selected text
+
+            if(selectedText.textContent == "") return null // if selection is empty
 
             // closure to get access to selectedText in user code
             return {
@@ -172,11 +221,14 @@ export default {
             saveContent: saveContent,
             handlePressedKey: handlePressedKey,
             closeSettingWindow: closeSettingWindow,
+            openSettingsWindow: openSettingsWindow,
 
             tools: tools,
             editorContentDOMElement: editorContentDOMElement,
             editorCodeContent: editorCodeContent,
-            settingWindowsVisibility: settingWindowsVisibility
+            settingWindowsVisibility: settingWindowsVisibility,
+            showSettingsTrigger: showSettingsTrigger,
+            rootEditorElement: rootEditorElement
         }
 
     },
@@ -205,7 +257,6 @@ export default {
         outline: none
 
     & .toolbar-inner-cotnainer
-        margin-top: 10px
         display: flex
         flex-wrap: wrap
         gap: 10px
@@ -218,9 +269,16 @@ export default {
             background: #1A2029
             color: #fff
             border: 1px solid #1F252E
-            box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+            box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px
+
+    &.light-theme
+        & .toolbar, & .content
+            background: #F5F5F5
+            color: #181E27
+            border: 1px solid #C2C2C2
+            box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px
             
-    & .additional-contianer
+    & .VSTEdit_additional-contianer
         display: none
 
 .__VSTEditor_input
@@ -229,31 +287,78 @@ export default {
 .__VSTEditor_button
     padding: 8px
 
-.dark-theme
-    & .__VSTEditor_input
+.__VSTEditor_input
         background: none
         border: 0
-        border-bottom: 1px solid #fff
         color: #fff
         box-sizing: border-box
         padding: 2px
-    & .__VSTEditor_button
-        background: #242931
+        width: 90%
+        min-width: 120px 
+
+.__VSTEditor_button
         transition: .4s
         border: 0
         outline: none
-        color: #fff
         cursor: pointer
-        border: 1px solid #30363E
         border-radius: 6px
         &:last-of-type
             margin-left: 10px
+
+.VSTEdit_settings_trigger
+    border-radius: 6px
+    cursor: pointer
+
+.VSTEdit__icon
+    width: 16px
+
+.dark-theme
+    & .__VSTEditor_input
+        border-bottom: 1px solid #fff
+
+    & .__VSTEditor_button
+        background: #242931
+        color: #fff
+        border: 1px solid #30363E
         &:hover
             background: #9F193A
+
+    & .VSTEdit_settings_trigger
+        background: #30363E
+
+    & .VSTEdit__icon
+        fill: #fff
+
+.light-theme
+    & .__VSTEditor_input
+        border-bottom: 1px solid #181E27
+        color: #181E27
+
+    & .__VSTEditor_button
+            background: #E7E8E9
+            color: #181E27
+            border: 1px solid #c2c2c2
+            &:hover
+                background: #93BCF9
+
+    & .VSTEdit_settings_trigger
+        background: #E7E8E9
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px
+
+    & .VSTEdit__icon
+        fill: #181E27
+
+.__VSTEditor_fullscreen
+    position: fixed
+    z-index: 12000
+    left: 0
+    top: 0
+    width: 100vw
+    height: 100vh
 
 .vste-fade-enter-from, .vste-fade-leave-to
   opacity: 0
 .vste-fade-enter-active, .vste-fade-leave-active
-  transition: opacity .3s ease-in
+  transition: opacity .3s ease-out
         
 </style>
