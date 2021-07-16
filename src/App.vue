@@ -1,6 +1,6 @@
 <template>
 	<div class="demo-container">
-		<editor>
+		<editor theme="dark-theme" :display-group-name="true">
 			<h1>Test</h1>
 		</editor>
 	</div>
@@ -13,7 +13,22 @@ export default {
 	name: 'App',
 	provide: {
 		customSettings: {
-			editorSettings: {imageLoadHandler: 'http://127.0.0.1:8000/api/upload-image'}
+			editorSettings: {imageLoadHandler: 'http://127.0.0.1:8000/api/upload-image'},
+			// tools: [
+			// 	{
+			// 		name: 'Test',
+			// 		tools: [
+			// 			{
+			// 				name: 'u_list', 
+			// 				title: "Unordered list", 
+			// 				displayContent: "ul", 
+			// 				action(editorState, insertFunction) { 
+			// 					insertFunction(editorState.targetElement, `<ul><li>Unordered List Item</li></ul>`)
+			// 				}
+			// 			}
+			// 		]
+			// 	}
+			// ]
 		}
 	},
 	components: {
