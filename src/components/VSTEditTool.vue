@@ -60,4 +60,11 @@ export default {
         &:hover
             background: #9F193A
             border-color: transparent
+
+    &.light-theme
+        background: #E7E8E9
+        bordedr: 1px solid #c2c2c2
+        &:hover
+            background: #93BCF9
+            border-color: transparent
 </style>
