@@ -114,7 +114,7 @@ export default [
                     *   We need it in order to avoid nested forms in HTML markup
                     */
 
-                    const formContainer = document.querySelector('.additional-contianer')
+                    const formContainer = document.querySelector('.VSTEdit_additional-contianer')
                     const form = document.createElement("form")
                     const input = document.createElement("input")
                     
@@ -161,7 +161,8 @@ export default [
                 title: "Align left", 
                 displayContent: "<", 
                 action(editorState) { 
-                    editorState.targetElement.style.textAlign = "left"
+                    if(!editorState.targetElement.classList.contains('__VSTEditor_content'))
+                        editorState.targetElement.style.textAlign = "left"
                 }
             },
             {
@@ -169,7 +170,8 @@ export default [
                 title: "Align center", 
                 displayContent: "|", 
                 action(editorState) { 
-                    editorState.targetElement.style.textAlign = "center"
+                    if(!editorState.targetElement.classList.contains('__VSTEditor_content'))
+                        editorState.targetElement.style.textAlign = "center"
                 }
             },            
             {
@@ -177,9 +179,119 @@ export default [
                 title: "Align right", 
                 displayContent: ">", 
                 action(editorState) { 
-                    editorState.targetElement.style.textAlign = "right"
+                    if(!editorState.targetElement.classList.contains('__VSTEditor_content'))
+                        editorState.targetElement.style.textAlign = "right"
                 }
             },
+        ]
+    },
+    {
+        name: 'Text',
+        tools: [
+            {
+                name: 'link', 
+                title: "Create link", 
+                displayContent: "a", 
+                action(editorState, insertFunction, wrappingFunction) { 
+                    const wrappingFunctionResult = wrappingFunction()
+
+                    if(wrappingFunctionResult == null) return;
+
+                    const a = document.createElement("a")
+                    a.href = "#"
+
+                    wrappingFunctionResult.append(a, wrappingFunctionResult.selectedText)
+                }
+            },
+            {
+                name: 'strong', 
+                title: "Strong text", 
+                displayContent: "s", 
+                action(editorState, insertFunction, wrappingFunction) { 
+                    const wrappingFunctionResult = wrappingFunction()
+
+                    if(wrappingFunctionResult == null) return;
+
+                    const strongItem = document.createElement("strong")
+                    wrappingFunctionResult.append(strongItem, wrappingFunctionResult.selectedText)
+                }
+            },
+            {
+                name: 'idiomatic', 
+                title: "Idiomatic text", 
+                displayContent: "i", 
+                action(editorState, insertFunction, wrappingFunction) { 
+                    const wrappingFunctionResult = wrappingFunction()
+
+                    if(wrappingFunctionResult == null) return;
+
+                    const idiomaticItem = document.createElement("i")
+                    wrappingFunctionResult.append(idiomaticItem, wrappingFunctionResult.selectedText)
+                }
+            },
+            {
+                name: 'underline', 
+                title: "Undelined text", 
+                displayContent: "u", 
+                action(editorState, insertFunction, wrappingFunction) { 
+                    const wrappingFunctionResult = wrappingFunction()
+
+                    if(wrappingFunctionResult == null) return;
+
+                    const underlineItem = document.createElement("u")
+                    wrappingFunctionResult.append(underlineItem, wrappingFunctionResult.selectedText)
+                }
+            },
+            {
+                name: 'deleted', 
+                title: "Deleted text", 
+                displayContent: "d", 
+                action(editorState, insertFunction, wrappingFunction) { 
+                    const wrappingFunctionResult = wrappingFunction()
+
+                    if(wrappingFunctionResult == null) return;
+
+                    const deletedItem = document.createElement("del")
+                    wrappingFunctionResult.append(deletedItem, wrappingFunctionResult.selectedText)
+                }
+            }
+        ]
+    },
+    {
+        name: "Lists",
+        tools: [
+            {
+                name: 'u_list', 
+                title: "Unordered list", 
+                displayContent: "ul", 
+                action(editorState, insertFunction) { 
+                    insertFunction(editorState.targetElement, `<ul><li>Unordered List Item</li></ul>`)
+                }
+            },
+            {
+                name: 'o_list', 
+                title: "Ordered list", 
+                displayContent: "ol", 
+                action(editorState, insertFunction) { 
+                    insertFunction(editorState.targetElement, `<ol><li>Unordered List Item</li></ol>`)
+                }
+            }
+        ]
+    },
+    {
+        name: "Fullscreen",
+        tools: [
+            {
+                name: 'toggle_fs', 
+                title: "Full screen", 
+                displayContent: "f", 
+                action(editorState) { 
+                    if(!editorState.rootEditorElement.classList.contains('__VSTEditor_fullscreen'))
+                        editorState.rootEditorElement.classList.add('__VSTEditor_fullscreen') 
+                    else
+                        editorState.rootEditorElement.classList.remove('__VSTEditor_fullscreen')
+                }
+            }
         ]
     }
 ]
