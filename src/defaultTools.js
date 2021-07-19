@@ -141,7 +141,7 @@ export default [
 
                     // check if link to image handler configured
                     if(!editorState.config) {
-                        alert("This editor instrance is not configured to upload images")
+                        alert("This editor instance is not configured to upload images")
                         return ;
                     }
 
