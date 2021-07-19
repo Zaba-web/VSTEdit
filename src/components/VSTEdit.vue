@@ -84,6 +84,18 @@ export default {
         displayGroupName: {
             type: Boolean,
             default: true
+        },
+        autoSave: {
+            type: Boolean,
+            default: false
+        },
+        autoSaveTime: {
+            type: Number,
+            default: 30000
+        },
+        autoSaveIdentifier: {
+            type: String,
+            default: '__VSTEditor'
         }
     },
 
@@ -118,8 +130,22 @@ export default {
             "A": () => settingWindowsVisibility.value.linkSettings = true
         }
 
+        // if enabled autosave
+        if(props.autoSave) {
+            setTimeout(()=>{
+                saveContent()
+                // save contnet in local storage
+                localStorage.setItem(props.autoSaveIdentifier, editorCodeContent.value)
+            }, props.autoSaveTime)
+        }
+
         onMounted(()=>{
             targetElement.value = editorContentDOMElement.value
+
+            // load saved data if it is set
+            if(props.autoSave && localStorage.getItem(props.autoSaveIdentifier) != null)
+                editorContentDOMElement.value.innerHTML = localStorage.getItem(props.autoSaveIdentifier)
+
             saveContent()
         })
 
