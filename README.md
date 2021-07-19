@@ -24,6 +24,7 @@ Editor can be configured by using following properties:
 - `auto-save` : Use it to enable automatic text saving into local storage. Expects boolean value. False by default.
 - `auto-save-time` : Time interval for text saving. Expects number value in milliseconds If auto save is enabled, auto-save-time is 30000 ms by default.
 - `auto-save-identifier` : Key name in local storage. Expects string value. If auto save is enabled, auto-save-identifier is *__VSTEditor* by default.
+- `content` : You can use that property to push HTML content into the editor.
 
 For example: 
 ```
@@ -41,3 +42,4 @@ Editor supports image loading. To enable this feature you should configure link 
 		}
 	}
 ```
+File input name is *upload*.
