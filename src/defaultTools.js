@@ -176,7 +176,7 @@ export default [
                             }
                             
                             let imageLink = request.responseText
-                            insertFunction(editorState.targetElement, `<img src='${imageLink}'>`)
+                            insertFunction(editorState.targetElement, `<p><img src='${imageLink}'></p>`)
 
                             form.remove() // when uploading an image, the form is deleted 
                         }
