@@ -1,4 +1,5 @@
 # vst-edit
+WYSIWYG text editor for Vue 3
 ![alt text](https://github.com/Zaba-web/VSTEdit/raw/main/image.jpg)
 
 
