@@ -1,6 +1,6 @@
 <template>
 	<div class="demo-container">
-		<editor theme="dark-theme" :display-group-name="true">
+		<editor theme="dark-theme" :display-group-name="true" :auto-save="true">
 			<h1>Test</h1>
 		</editor>
 	</div>
