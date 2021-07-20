@@ -1,8 +1,6 @@
 <template>
 	<div class="demo-container">
-		<editor theme="dark-theme" :display-group-name="true" :auto-save="true">
-			<h1>Test</h1>
-		</editor>
+		<editor theme="dark-theme" input-name="content" :display-group-name="false" :auto-save="true" />
 	</div>
 </template>
 
@@ -40,6 +38,7 @@ export default {
 <style lang="sass">
 body
 	background: #1E252E
+	font-family: 'Calibri Light'
 .demo-container
 	width: 900px
 	height: 600px

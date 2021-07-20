@@ -28,9 +28,10 @@
             @click="getTargetElement"
             @blur="saveContent" 
             ref="editorContentDOMElement" 
-            @keydown="handlePressedKey" 
+            @keydown="handlePressedKey"
+			v-html="content"
         >
-            <slot></slot>
+
         </div>
         <div class="VSTEdit_additional-contianer">
             <input type="hidden" v-model="editorCodeContent" :name="inputName">
@@ -96,7 +97,11 @@ export default {
         autoSaveIdentifier: {
             type: String,
             default: '__VSTEditor'
-        }
+        },
+		content: {
+			type: String,
+			default: ""
+		}
     },
 
     setup(props, context) {
