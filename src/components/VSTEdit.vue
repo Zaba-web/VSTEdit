@@ -34,7 +34,7 @@
 
         </div>
         <div class="VSTEdit_additional-contianer">
-            <input type="hidden" v-model="editorCodeContent" :name="inputName">
+            <input type="hidden" :name="inputName" :value="editorCodeContent">
         </div>
         <settings-trigger v-if="showSettingsTrigger" @click="openSettingsWindow"></settings-trigger>
         <image-setting 
@@ -151,7 +151,14 @@ export default {
             if(props.autoSave && localStorage.getItem(props.autoSaveIdentifier) != null)
                 editorContentDOMElement.value.innerHTML = localStorage.getItem(props.autoSaveIdentifier)
 
-            saveContent()
+            const loadContent = setInterval(()=>{
+                if(props.content != '') {
+                    editorCodeContent.value = props.content
+                    clearInterval(loadContent)
+                }
+            }, 1000);
+
+            setTimeout(()=>{clearInterval(loadContent)}, 8000)
         })
 
         // detect last element was clicked
