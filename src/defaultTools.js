@@ -147,7 +147,7 @@ export default [
 
                     /*
                     *   Create form with file input dynamically
-                    *   We need it in order to avoid nested forms in HTML markup
+                    *   We need to do it in order to avoid unpredictable mistakes with nested forms in HTML markup
                     */
 
                     const formContainer = document.querySelector('.VSTEdit_additional-contianer')
@@ -169,7 +169,7 @@ export default [
                         request.open('POST', editorState.config.imageLoadHandler)
 
                         request.onload = () => {
-                            // request failed
+                            // if request failed
                             if(request.status != 200) { 
                                 alert(`Error: image could not be uploaded. Status code: ${request.status}`) 
                                 return ;
@@ -178,7 +178,7 @@ export default [
                             let imageLink = request.responseText
                             insertFunction(editorState.targetElement, `<p><img src='${imageLink}'></p>`)
 
-                            form.remove() // when uploading an image, the form is deleted 
+                            form.remove() // delete created form after image uploading
                         }
 
                         request.send(formData)
